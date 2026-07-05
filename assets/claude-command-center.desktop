@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Claude Command Center
+GenericName=Claude multi-session shell
+Comment=Tiled multi-session command center for claude.ai
+Exec=/home/thor/claude-command-center/node_modules/.bin/electron /home/thor/claude-command-center
+Icon=claude-command-center
+Terminal=false
+Categories=Network;
+Keywords=claude;ai;chat;
+StartupNotify=true
+StartupWMClass=claude-command-center
