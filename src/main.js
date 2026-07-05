@@ -146,6 +146,34 @@ function createTab(url, restoreMeta) {
   // Focus/click anywhere in a chat => it becomes active (MRU input).
   wc.on('focus', () => activate(tab.id, /*fromUser*/ true));
 
+  // Reload this tile: Ctrl+R / F5 (Ctrl+Shift+R = hard). Scoped to the focused
+  // tile via before-input-event so it never hijacks the shortcut system-wide.
+  wc.on('before-input-event', (e, input) => {
+    if (input.type !== 'keyDown') return;
+    const k = (input.key || '').toLowerCase();
+    const mod = input.control || input.meta;
+    if (k === 'f5' || (mod && k === 'r')) {
+      e.preventDefault();
+      if (mod && input.shift) wc.reloadIgnoringCache(); else wc.reload();
+    }
+  });
+
+  // Right-click menu (the native one is otherwise swallowed by the view).
+  wc.on('context-menu', (_e, params) => {
+    const nav = wc.navigationHistory;
+    Menu.buildFromTemplate([
+      { label: 'Reload', accelerator: 'CmdOrCtrl+R', click: () => wc.reload() },
+      { label: 'Hard Reload', click: () => wc.reloadIgnoringCache() },
+      { type: 'separator' },
+      { label: 'Back', enabled: nav.canGoBack(), click: () => nav.goBack() },
+      { label: 'Forward', enabled: nav.canGoForward(), click: () => nav.goForward() },
+      { type: 'separator' },
+      { label: 'Cut', role: 'cut', enabled: params.editFlags.canCut },
+      { label: 'Copy', role: 'copy', enabled: params.editFlags.canCopy },
+      { label: 'Paste', role: 'paste', enabled: params.editFlags.canPaste },
+    ]).popup();
+  });
+
   // Links that would spawn a window -> open as a new tab if they're claude.ai.
   wc.setWindowOpenHandler(({ url: target }) => {
     if (target.startsWith(CFG.ORIGIN)) { createTab(target); }
