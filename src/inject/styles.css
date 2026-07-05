@@ -1,0 +1,55 @@
+/* ==========================================================================
+   Injected into every claude.ai tile. Goal: kill the wasted left/right gutter
+   so narrow tiles are actually usable, and stop wide tables running off-page.
+
+   claude.ai's DOM/class names change over time. These selectors are written
+   defensively (attribute + role based where possible) and everything is
+   !important so we win the cascade. If Anthropic reshuffles the markup and a
+   rule stops biting, it just no-ops — it never breaks the page.
+   ========================================================================== */
+
+/* 1. Widen the conversation column. The chat is centred inside a max-width
+      container with big auto margins — that's the gutter you're seeing. */
+main div[class*="max-w-"],
+main .max-w-3xl,
+main .max-w-2xl,
+main [class*="mx-auto"] {
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+/* 2. Message rows themselves — remove inner horizontal padding bloat. */
+main [data-testid*="message"],
+main [class*="prose"] {
+  max-width: 100% !important;
+}
+
+/* 3. Tables: make them scroll inside their own box instead of pushing the
+      whole layout wider than the tile. */
+main table {
+  display: block !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  width: max-content !important;
+}
+/* keep code blocks from doing the same thing */
+main pre {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* 4. Trim a little vertical chrome so more conversation is visible in a short
+      tile (we already have our own top/bottom bars in the shell). */
+main { padding-top: 4px !important; }
+
+/* 5. Sidebar: default collapsed feel. The shell toggles a body class to force
+      it open/closed per tile (see preload-view.js). */
+body.ccc-sidebar-collapsed nav[class*="sidebar"],
+body.ccc-sidebar-collapsed [data-testid*="sidebar"] {
+  width: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}

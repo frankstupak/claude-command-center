@@ -1,0 +1,69 @@
+<!doctype html>
+<meta charset="utf-8" />
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden;
+    background: #0d0d0d; color: #cfcfcf;
+    font: 11px/1.2 -apple-system, 'Segoe UI', Roboto, sans-serif;
+    -webkit-user-select: none; user-select: none; }
+  .bar { display: flex; align-items: center; height: 30px; gap: 14px; padding: 0 12px; }
+  .metric { display: flex; align-items: center; gap: 6px; }
+  .metric .lbl { color: #8a8a8a; }
+  .metric .val { color: #eaeaea; font-variant-numeric: tabular-nums; }
+  .track { width: 60px; height: 6px; background: #262626; border-radius: 3px; overflow: hidden; }
+  .fill { height: 100%; width: 0; background: #d0894a; transition: width .3s; }
+  .fill.warn { background: #d9a441; }
+  .fill.hot { background: #d0533a; }
+  .spacer { flex: 1; }
+  .status { color: #9a9a9a; }
+  .status.limit { color: #d9a441; }
+  .status.resume { color: #7fb37f; }
+</style>
+
+<div class="bar">
+  <div class="metric" id="m-session">
+    <span class="lbl">Session</span>
+    <span class="track"><span class="fill" id="f-session"></span></span>
+    <span class="val" id="v-session">—</span>
+  </div>
+  <div class="metric" id="m-weekly">
+    <span class="lbl">Weekly</span>
+    <span class="track"><span class="fill" id="f-weekly"></span></span>
+    <span class="val" id="v-weekly">—</span>
+  </div>
+  <div class="metric" id="m-fable">
+    <span class="lbl">Fable</span>
+    <span class="track"><span class="fill" id="f-fable"></span></span>
+    <span class="val" id="v-fable">—</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+  const $ = (s) => document.querySelector(s);
+  function paint(prefix, obj) {
+    if (!obj || typeof obj.pct !== 'number') return;
+    const f = $('#f-' + prefix), v = $('#v-' + prefix);
+    f.style.width = Math.min(100, obj.pct) + '%';
+    f.className = 'fill' + (obj.pct >= 90 ? ' hot' : obj.pct >= 70 ? ' warn' : '');
+    v.textContent = obj.pct + '%' + (obj.reset ? ' · ' + obj.reset : '');
+  }
+  window.ccc.on('usage', (u) => {
+    if (!u) return;
+    paint('session', u.session);
+    paint('weekly', u.weekly);
+    paint('fable', u.fableWeekly);
+    // u.raw arrives before field-binding; show a subtle hint it's flowing
+    if (u.raw && !u.session && !u.weekly) $('#status').textContent = 'usage stream detected (unbound)';
+  });
+  window.ccc.on('limit', (d) => {
+    const s = $('#status'); s.className = 'status limit';
+    s.textContent = 'Limit hit' + (d.resumeInSec ? ` · auto-resume ~${Math.round(d.resumeInSec/60)}m` : '') ;
+  });
+  window.ccc.on('resumed', () => {
+    const s = $('#status'); s.className = 'status resume'; s.textContent = 'Resumed';
+    setTimeout(() => { s.textContent = ''; s.className = 'status'; }, 8000);
+  });
+</script>

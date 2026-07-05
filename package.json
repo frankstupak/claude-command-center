@@ -1,0 +1,27 @@
+{
+  "name": "claude-command-center",
+  "productName": "Claude Command Center",
+  "version": "0.1.0",
+  "description": "Tiled multi-session command center for claude.ai — BaseWindow + N WebContentsViews, MRU auto-priority, slider paging, unified usage bar, native ports of Auto-Continue / Usage-Tracker / session-resume.",
+  "main": "src/main.js",
+  "author": "Frank Stupak",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "start:verbose": "ELECTRON_ENABLE_LOGGING=1 CCC_DEBUG=1 electron .",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "uk.lumennode.claude-command-center",
+    "productName": "Claude Command Center",
+    "files": ["src/**/*", "package.json"],
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Network"
+    }
+  },
+  "devDependencies": {
+    "electron": "^41.0.0",
+    "electron-builder": "^26.0.0"
+  }
+}

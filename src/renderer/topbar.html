@@ -1,0 +1,72 @@
+<!doctype html>
+<meta charset="utf-8" />
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden;
+    background: #111; color: #e6e6e6;
+    font: 12px/1.2 -apple-system, 'Segoe UI', Roboto, sans-serif;
+    -webkit-user-select: none; user-select: none; }
+  .bar { display: flex; align-items: center; height: 40px; gap: 6px; padding: 0 6px; }
+  button { background: #222; color: #ddd; border: 1px solid #333; border-radius: 6px;
+    height: 26px; padding: 0 8px; cursor: pointer; font: inherit; }
+  button:hover { background: #2c2c2c; }
+  .icon { width: 26px; padding: 0; font-size: 15px; line-height: 1; }
+  #tabs { display: flex; align-items: center; gap: 4px; flex: 1; overflow: hidden; }
+  .chip { display: flex; align-items: center; gap: 6px; max-width: 200px;
+    height: 26px; padding: 0 6px 0 10px; border: 1px solid #333; border-radius: 6px;
+    background: #1c1c1c; cursor: pointer; white-space: nowrap; }
+  .chip .t { overflow: hidden; text-overflow: ellipsis; }
+  .chip.active { background: #3a2f1e; border-color: #7a5a24; }
+  .chip.offscreen { opacity: 0.55; }
+  .chip .x { opacity: 0.5; font-size: 13px; }
+  .chip .x:hover { opacity: 1; color: #ff8a80; }
+  .pager { display: flex; align-items: center; gap: 4px; color: #999; }
+  .pager .rng { min-width: 54px; text-align: center; }
+  .sp { flex: 0 0 1px; height: 20px; background: #333; margin: 0 2px; }
+</style>
+
+<div class="bar">
+  <button class="icon" id="add" title="New chat (Ctrl+T)">＋</button>
+  <div class="sp"></div>
+  <div id="tabs"></div>
+  <div class="sp"></div>
+  <div class="pager">
+    <button class="icon" id="prev" title="Scroll left (Ctrl+←)">‹</button>
+    <span class="rng" id="rng">–</span>
+    <button class="icon" id="next" title="Scroll right (Ctrl+→)">›</button>
+  </div>
+  <div class="sp"></div>
+  <button id="side" title="Toggle sidebar in active chat">☰ sidebar</button>
+</div>
+
+<script>
+  const $ = (s) => document.querySelector(s);
+  $('#add').onclick  = () => window.ccc.send('ccc:newTab');
+  $('#prev').onclick = () => window.ccc.send('ccc:page', -1);
+  $('#next').onclick = () => window.ccc.send('ccc:page', +1);
+  $('#side').onclick = () => window.ccc.send('ccc:toggleSidebar');
+
+  window.ccc.on('tabs', (st) => {
+    const box = $('#tabs');
+    box.innerHTML = '';
+    st.tabs.forEach((t, i) => {
+      const onscreen = i >= st.pageOffset && i < st.pageOffset + st.columns;
+      const chip = document.createElement('div');
+      chip.className = 'chip' + (t.id === st.activeId ? ' active' : '') + (onscreen ? '' : ' offscreen');
+      const label = document.createElement('span');
+      label.className = 't'; label.textContent = t.title;
+      const x = document.createElement('span');
+      x.className = 'x'; x.textContent = '×';
+      x.onclick = (e) => { e.stopPropagation(); window.ccc.send('ccc:closeTab', t.id); };
+      chip.onclick = () => window.ccc.send('ccc:focusTab', t.id);
+      chip.appendChild(label); chip.appendChild(x);
+      box.appendChild(chip);
+    });
+    const first = st.pageOffset + 1;
+    const last = Math.min(st.pageOffset + st.columns, st.tabs.length);
+    $('#rng').textContent = st.tabs.length ? `${first}–${last}/${st.tabs.length}` : '–';
+    $('#prev').disabled = st.pageOffset <= 0;
+    $('#next').disabled = st.pageOffset >= st.maxOffset;
+  });
+</script>
