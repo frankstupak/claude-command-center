@@ -5,6 +5,7 @@ chats, your own chrome instead of fighting the OS window manager.
 
 ![Claude Command Center tiled across multiple chats](assets/tiled-window.png)
 
+[![CI](https://github.com/frankstupak/claude-command-center/actions/workflows/ci.yml/badge.svg)](https://github.com/frankstupak/claude-command-center/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0-informational.svg)](CHANGELOG.md)
 
